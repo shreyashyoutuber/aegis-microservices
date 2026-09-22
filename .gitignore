@@ -5,3 +5,11 @@ target/
 .classpath 
 .project 
 .settings/ 
+.metadata/ 
+.vscode/ 
+target/ 
+.classpath 
+.project 
+.settings/ 
+.factorypath 
+*.class 
