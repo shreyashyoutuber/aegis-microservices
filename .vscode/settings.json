@@ -1,0 +1,10 @@
+{
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "java.checkstyle.enabled": false,
+    "java.compiler.pb.suppressWarnings": true,
+    "java.errors.incompleteClasspath.severity": "ignore",
+    "java.validation.enabled": false,
+    "java.autobuild.enabled": true,
+    "java.completion.enabled": true
+}
