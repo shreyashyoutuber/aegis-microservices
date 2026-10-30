@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b0e14">
+    <title>Cell Broadcast Service</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #0b0e14;
+            color: #ffffff;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        /* Initial Setup Screen */
+        .setup-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .setup-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 20px;
+            padding: 32px 24px;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #3fb950;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.4; transform: scale(0.9); }
+        }
+
+        .btn-enable {
+            background: linear-gradient(135deg, #1f6feb, #238636);
+            color: #ffffff;
+            border: none;
+            padding: 18px 24px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 16px rgba(31, 111, 235, 0.4);
+            letter-spacing: 0.5px;
+        }
+
+        /* Native-Style Cell Broadcast Overlay (Full Screen OS Replica) */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .alert-box {
+            background-color: #262629;
+            color: #e3e3e3;
+            border-radius: 16px;
+            max-width: 360px;
+            width: 92%;
+            padding: 24px 20px 16px 20px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: alertPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+        }
+
+        @keyframes alertPop {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .alert-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .warning-triangle {
+            width: 30px;
+            height: 30px;
+            background: #e53935;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .warning-triangle::after {
+            content: "!";
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 17px;
+            margin-top: 3px;
+        }
+
+        .alert-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.1px;
+        }
+
+        .alert-content {
+            font-size: 0.86rem;
+            color: #cccccc;
+            line-height: 1.48;
+            margin-bottom: 22px;
+            max-height: 55vh;
+            overflow-y: auto;
+            white-space: pre-line;
+        }
+
+        .alert-action {
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding-top: 12px;
+        }
+
+        .btn-ok {
+            background: transparent;
+            border: none;
+            color: #e53935;
+            font-size: 1.1rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            padding: 8px 0;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Setup View -->
+    <div class="setup-container" id="setupView">
+        <div class="setup-card">
+            <div class="status-badge">
+                <span class="status-dot"></span>
+                <span>SYSTEM LISTENER READY</span>
+            </div>
+            <h2 style="font-size: 1.3rem; margin-bottom: 8px; color: #fff;">AEGIS Cell Broadcast</h2>
+            <p style="font-size: 0.9rem; color: #8b949e; line-height: 1.4;">Tap below to arm your device for government emergency alerts.</p>
+
+            <button class="btn-enable" id="enableBtn" onclick="armListener()">ARM FULL-SCREEN ALERT</button>
+        </div>
+    </div>
+
+    <!-- Native Dark Cell Broadcast Pop-up -->
+    <div class="overlay" id="alertOverlay">
+        <div class="alert-box">
+            <div class="alert-header">
+                <div class="warning-triangle"></div>
+                <div class="alert-title" id="popupTitle">Extremely severe alert</div>
+            </div>
+            <div class="alert-content" id="popupContent">
+                India, launches Cell Broadcast using indigenous technology, for instant disaster alerting service for its citizens. Alert citizens, safe nation. No action is required by the public upon receipt of this message. This is a test message. - Government of India.
+
+                भारत ने स्वदेशी तकनीक का उपयोग करते हुए सेल ब्रॉडकास्ट सेवा शुरू की है, जिससे नागरिकों को आपदा की तत्काल सूचना मिल सकेगी। सतर्क नागरिक, सुरक्षित राष्ट्र। इस संदेश को प्राप्त करने पर जनता को कोई कार्रवाई करने की आवश्यकता नहीं है। यह एक परीक्षण संदेश है। - भारत सरकार
+            </div>
+            <div class="alert-action">
+                <button class="btn-ok" onclick="dismissAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let sirenInterval = null;
+
+        function armListener() {
+            // Request Native Fullscreen mode to hide browser address bar!
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen().catch(err => console.log(err));
+            }
+
+            // Initialize Audio
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            document.getElementById('enableBtn').innerText = "✅ SYSTEM ARMED & READY";
+            document.getElementById('enableBtn').style.background = "linear-gradient(135deg, #238636, #2ea043)";
+            document.getElementById('enableBtn').disabled = true;
+
+            connectSse();
+        }
+
+        function connectSse() {
+            const eventSource = new EventSource('/api/broadcast/subscribe');
+
+            eventSource.addEventListener('EMERGENCY_ALERT', function(event) {
+                const data = JSON.parse(event.data);
+                triggerCellBroadcast(data.title, data.message);
+            });
+        }
+
+        function triggerCellBroadcast(title, message) {
+            // Force Fullscreen if not already
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            }
+
+            document.getElementById('popupTitle').innerText = title || "Extremely severe alert";
+            document.getElementById('popupContent').innerText = message;
+            document.getElementById('alertOverlay').style.display = "flex";
+
+            startSirenSound();
+
+            if ("vibrate" in navigator) {
+                navigator.vibrate([1000, 500, 1000, 500, 1000, 500, 1000]);
+            }
+        }
+
+        function startSirenSound() {
+            if (!audioCtx) return;
+            stopSirenSound();
+
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(850, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+
+            let high = true;
+            sirenInterval = setInterval(() => {
+                if (osc && audioCtx) {
+                    osc.frequency.setValueAtTime(high ? 950 : 650, audioCtx.currentTime);
+                    high = !high;
+                }
+            }, 300);
+
+            osc.stop(audioCtx.currentTime + 15);
+        }
+
+        function stopSirenSound() {
+            if (sirenInterval) {
+                clearInterval(sirenInterval);
+                sirenInterval = null;
+            }
+            if ("vibrate" in navigator) {
+                navigator.vibrate(0);
+            }
+        }
+
+        function dismissAlert() {
+            document.getElementById('alertOverlay').style.display = "none";
+            stopSirenSound();
+
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(e => console.log(e));
+            }
+        }
+    </script>
+</body>
+</html>

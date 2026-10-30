@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS - Emergency Command Center & Broadcast Dispatcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --accent-red: #da3633;
+            --accent-red-hover: #f85149;
+            --text-main: #c9d1d9;
+            --text-heading: #ffffff;
+            --accent-green: #3fb950;
+            --accent-blue: #58a6ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #da3633, #8e1512);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(218, 54, 51, 0.4);
+        }
+
+        .brand-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: 0.5px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(63, 185, 80, 0.1);
+            border: 1px solid rgba(63, 185, 80, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: var(--accent-green);
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+
+        .stat-val.red { color: var(--accent-red-hover); }
+        .stat-val.green { color: var(--accent-green); }
+
+        .stat-lbl {
+            font-size: 0.8rem;
+            color: #8b949e;
+            margin-top: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .dispatch-box {
+            background: linear-gradient(180deg, #1c1214 0%, #161b22 100%);
+            border: 1px solid #482325;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .btn-dispatch {
+            background: linear-gradient(135deg, #da3633 0%, #8e1512 100%);
+            color: #ffffff;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(218, 54, 51, 0.4);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-dispatch:hover {
+            background: linear-gradient(135deg, #f85149 0%, #b62324 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(248, 81, 73, 0.6);
+        }
+
+        .btn-dispatch:active {
+            transform: translateY(1px);
+        }
+
+        /* QR Code Card */
+        .qr-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-frame {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .qr-frame img {
+            width: 180px;
+            height: 180px;
+            display: block;
+        }
+
+        .qr-url {
+            font-family: monospace;
+            background: #0d1117;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            word-break: break-all;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-logo">A</div>
+            <div>
+                <div class="brand-title">AEGIS DISPATCH COMMAND CENTER</div>
+                <div style="font-size: 0.8rem; color: #8b949e;">Emergency Response & Cell Broadcast System</div>
+            </div>
+        </div>
+        <div class="system-status">
+            <span class="status-dot"></span>
+            <span>SYSTEM ACTIVE (PHONE HOTSPOT)</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Main Control Console -->
+        <div class="card">
+            <div class="card-title">
+                <span>📡 LIVE BROADCAST CONSOLE</span>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-val green" id="connectedCount">0</div>
+                    <div class="stat-lbl">Connected Devices</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val red" id="broadcastTotal">0</div>
+                    <div class="stat-lbl">Dispatches Sent</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">6</div>
+                    <div class="stat-lbl">Microservices UP</div>
+                </div>
+            </div>
+
+            <div class="dispatch-box">
+                <h3 style="color: #f85149; margin-bottom: 8px;">EMERGENCY CELL BROADCAST DISPATCH</h3>
+                <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 20px;">
+                    Triggering this will immediately blare loud sirens and display full-screen dark Cell Broadcast warning dialogs on all connected mobile phones.
+                </p>
+
+                <button class="btn-dispatch" onclick="triggerCellBroadcast()">
+                    🚨 DISPATCH RED ALERT BROADCAST
+                </button>
+            </div>
+        </div>
+
+        <!-- QR Code Join Card -->
+        <div class="card qr-card">
+            <div class="card-title">
+                <span>📱 CONNECT MOBILE PHONES</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #8b949e;">
+                Scan with phone camera or open link to join Hotspot Broadcast Zone:
+            </p>
+
+            <div class="qr-frame">
+                <img id="qrImg" src="" alt="Scan QR Code">
+            </div>
+
+            <div style="font-size: 0.8rem; color: #8b949e;">Receiver URL:</div>
+            <div class="qr-url" id="receiverUrlText">Loading URL...</div>
+        </div>
+    </div>
+
+    <script>
+        let totalDispatches = 0;
+        const LAPTOP_IP = "10.123.32.234"; // Current IP Address
+
+        function updateReceiverUrl() {
+            let host = window.location.host;
+            if (host.includes("localhost") || host.includes("127.0.0.1")) {
+                host = LAPTOP_IP + ":8083";
+            }
+            const fullUrl = window.location.protocol + "//" + host + "/alert.html";
+            
+            document.getElementById('receiverUrlText').innerText = fullUrl;
+            document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(fullUrl)}`;
+        }
+
+        function pollSubscribers() {
+            fetch('/api/broadcast/subscribers')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('connectedCount').innerText = data.activeListeners || 0;
+                })
+                .catch(err => console.error(err));
+        }
+
+        function triggerCellBroadcast() {
+            fetch('/api/broadcast/dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: "Extremely severe alert",
+                    message: "India, launches Cell Broadcast using indigenous technology, for instant disaster alerting service for its citizens. Alert citizens, safe nation. No action is required by the public upon receipt of this message. This is a test message. - Government of India.\n\nभारत ने स्वदेशी तकनीक का उपयोग करते हुए सेल ब्रॉडकास्ट सेवा शुरू की है, जिससे नागरिकों को आपदा की तत्काल सूचना मिल सकेगी। सतर्क नागरिक, सुरक्षित राष्ट्र। इस संदेश को प्राप्त करने पर जनता को कोई कार्रवाई करने की आवश्यकता नहीं है। यह एक परीक्षण संदेश है। - भारत सरकार"
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                totalDispatches++;
+                document.getElementById('broadcastTotal').innerText = totalDispatches;
+                alert("🚨 RED ALERT BROADCAST SENT TO " + data.broadcastCount + " CONNECTED MOBILE PHONES!");
+            })
+            .catch(err => alert("Dispatch failed: " + err));
+        }
+
+        window.onload = function() {
+            updateReceiverUrl();
+            pollSubscribers();
+            setInterval(pollSubscribers, 2000);
+        };
+    </script>
+</body>
+</html>

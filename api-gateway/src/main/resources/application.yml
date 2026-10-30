@@ -29,6 +29,12 @@ spring:
           predicates:
             - Path=/resources/**
 
+        # Response Service Route (Dispatch)
+        - id: response-service
+          uri: lb://RESPONSE-SERVICE
+          predicates:
+            - Path=/dispatch/**
+
 eureka:
   client:
     service-url:

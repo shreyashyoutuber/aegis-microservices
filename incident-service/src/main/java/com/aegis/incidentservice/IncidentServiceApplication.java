@@ -9,7 +9,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * Aegis Emergency Response System
  *
  * Manages emergency incidents: fire, flood, medical, earthquake, etc.
- *
  * Runs on Port: 8081
  * Registers with Eureka at: http://localhost:2026
  *
